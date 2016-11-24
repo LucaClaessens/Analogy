@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>three.js webgl - buffergeometry - lines drawcalls</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+
+    @import url('https://fonts.googleapis.com/css?family=Raleway');
+    html,body{
+        width:100%;
+        height:100%;
+        margin:0 auto;
+        padding:0 auto;
+        font-family: 'Raleway', sans-serif;
+    }
+    body {
+        color: #cccccc;
+        font-size: 13px;
+        text-align: center;
+        background-color: #000000;
+        margin: 0px;
+        overflow: hidden;
+    }
+    
+    #info {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+        padding: 5px;
+    }
+    
+    a {
+        color: #0080ff;
+    }
+
+    #frontdisplay{
+        position: absolute;
+        top:50%;
+        left:50%;
+        transform: translateX(-50%) translateY(-50%);
+        color:white;
+        font-size:4rem;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="frontdisplay"></div>
+    <script src="three.js"></script>
+    <script src="OrbitControls.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script>
+    var group;
+    var container, controls;
+    var particlesData = [];
+    var camera, scene, renderer;
+    var positions, colors;
+    var particles;
+    var pointCloud;
+    var limitConnections = true;
+    var particlePositions;
+    var linesMesh;
+
+    var maxParticleCount = 500;
+    var particleCount = 50;
+    var r = 1100;
+    var rHalf = r / 2;
+    var minDistance = 50;
+    var maxConnections = 5;
+
+    var activeCollision;
+    var pollForWord = true;
+    var prevNumConnected;
+    var ticks = 0;
+    var readtext = [];
+
+    init();
+    animate();
+
+    function init() {
+
+        jQuery.get('data.txt', function(data) {
+        readtext = data.split(' ');
+        console.log(readtext)
+        });
+
+        container = document.getElementById('container');
+
+        //
+
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 20000);
+        camera.position.z = 750;
+
+        controls = new THREE.OrbitControls(camera, container);
+
+        scene = new THREE.Scene();
+
+
+        group = new THREE.Group();
+        scene.add(group);
+
+        var segments = maxParticleCount * maxParticleCount;
+
+        positions = new Float32Array(segments * 3);
+        colors = new Float32Array(segments * 3);
+
+        var pMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 3,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            sizeAttenuation: false
+        });
+
+        particles = new THREE.BufferGeometry();
+        particlePositions = new Float32Array(maxParticleCount * 3);
+
+        for (var i = 0; i < maxParticleCount; i++) {
+
+            var x = Math.random() * r - r / 2;
+            var y = Math.random() * r - r / 2;
+            var z = Math.random() * r - r / 2;
+
+            particlePositions[i * 3] = x;
+            particlePositions[i * 3 + 1] = y;
+            particlePositions[i * 3 + 2] = z;
+
+            // add it to the geometry
+            particlesData.push({
+                velocity: new THREE.Vector3(-1 + Math.random() * 2, -1 + Math.random() * 2, -1 + Math.random() * 2),
+                numConnections: 0
+            });
+
+        }
+
+        particles.setDrawRange(0, particleCount);
+        particles.addAttribute('position', new THREE.BufferAttribute(particlePositions, 3).setDynamic(true));
+
+        // create the particle system
+        pointCloud = new THREE.Points(particles, pMaterial);
+        group.add(pointCloud);
+
+        var geometry = new THREE.BufferGeometry();
+
+        geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3).setDynamic(true));
+        geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3).setDynamic(true));
+
+        //geometry.computeBoundingSphere();
+
+        geometry.setDrawRange(0, 0);
+
+        var material = new THREE.LineBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+
+        linesMesh = new THREE.LineSegments(geometry, material);
+        group.add(linesMesh);
+
+        //
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        renderer.gammaInput = true;
+        renderer.gammaOutput = true;
+
+        container.appendChild(renderer.domElement);
+
+        window.addEventListener('resize', onWindowResize, false);
+
+    }
+
+    function onWindowResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function animate() {
+
+        var vertexpos = 0;
+        var colorpos = 0;
+        var numConnected = 0;
+
+        for (var i = 0; i < particleCount; i++)
+            particlesData[i].numConnections = 0;
+
+        for (var i = 0; i < particleCount; i++) {
+
+            // get the particle
+            var particleData = particlesData[i];
+
+            particlePositions[i * 3] += particleData.velocity.x;
+            particlePositions[i * 3 + 1] += particleData.velocity.y;
+            particlePositions[i * 3 + 2] += particleData.velocity.z;
+
+            if (particlePositions[i * 3 + 1] < -rHalf || particlePositions[i * 3 + 1] > rHalf)
+                particleData.velocity.y = -particleData.velocity.y;
+
+            if (particlePositions[i * 3] < -rHalf || particlePositions[i * 3] > rHalf)
+                particleData.velocity.x = -particleData.velocity.x;
+
+            if (particlePositions[i * 3 + 2] < -rHalf || particlePositions[i * 3 + 2] > rHalf)
+                particleData.velocity.z = -particleData.velocity.z;
+
+            if (limitConnections && particleData.numConnections >= maxConnections)
+                continue;
+
+            // Check collision
+            for (var j = i + 1; j < particleCount; j++) {
+
+                var particleDataB = particlesData[j];
+                if (limitConnections && particleDataB.numConnections >= maxConnections)
+                    continue;
+
+                var dx = particlePositions[i * 3] - particlePositions[j * 3];
+                var dy = particlePositions[i * 3 + 1] - particlePositions[j * 3 + 1];
+                var dz = particlePositions[i * 3 + 2] - particlePositions[j * 3 + 2];
+                var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                if (dist < minDistance) {
+
+                    particleData.numConnections++;
+                    particleDataB.numConnections++;
+
+                    var alpha = 1.0 - dist / minDistance;
+
+                    positions[vertexpos++] = particlePositions[i * 3];
+                    positions[vertexpos++] = particlePositions[i * 3 + 1];
+                    positions[vertexpos++] = particlePositions[i * 3 + 2];
+
+                    positions[vertexpos++] = particlePositions[j * 3];
+                    positions[vertexpos++] = particlePositions[j * 3 + 1];
+                    positions[vertexpos++] = particlePositions[j * 3 + 2];
+
+                    colors[colorpos++] = alpha;
+                    colors[colorpos++] = alpha;
+                    colors[colorpos++] = alpha;
+
+                    colors[colorpos++] = alpha;
+                    colors[colorpos++] = alpha;
+                    colors[colorpos++] = alpha;
+
+                    numConnected++;
+
+                }
+            }
+        }
+
+        if (numConnected > 0) {
+            if (!activeCollision) {
+                activeCollision = true
+            }
+            if (pollForWord || (prevNumConnected < numConnected)) {
+                NewWord();
+                pollForWord = false
+            }
+        }
+
+        if (numConnected == 0 && activeCollision) {
+            activeCollision = false
+            pollForWord = true
+        }
+
+        prevNumConnected = numConnected
+
+
+        linesMesh.geometry.setDrawRange(0, numConnected * 2);
+        linesMesh.geometry.attributes.position.needsUpdate = true;
+        linesMesh.geometry.attributes.color.needsUpdate = true;
+
+        pointCloud.geometry.attributes.position.needsUpdate = true;
+
+        requestAnimationFrame(animate);
+
+        render();
+
+    }
+
+    // work on particle count propagation
+    function NewWord() {
+        ticks++;
+        console.log(ticks);
+        $('#frontdisplay').html(readtext[ticks]);
+        if (particleCount < 200 && (ticks % 5 == 1)) {
+            console.log('add 1')
+            particleCount ++;
+        } else if((particleCount > 200) && (ticks % (ticks/8) == 1)) {
+            particleCount ++;
+        }
+
+        if (particleCount < 150) {
+            if (ticks% 2 == 1){
+            minDistance ++;
+            console.log('1 closer')
+            }
+        } else if (ticks % (ticks/8) == 1) {
+            minDistance --;
+            if (minDistance < 100) {
+                minDistance = 250;
+            }
+        }
+
+        particles.setDrawRange(0, particleCount);
+        particles.addAttribute('position', new THREE.BufferAttribute(particlePositions, 3).setDynamic(true));
+
+    }
+
+    function render() {
+
+        var time = Date.now() * 0.001;
+        group.rotation.y = time * 0.1;
+        renderer.render(scene, camera);
+        pointCloud.geometry.attributes.position.needsUpdate = true;
+
+    }
+    </script>
+</body>
+
+</html>
