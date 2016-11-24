@@ -10,6 +10,7 @@ files = []
 start_dir = os.getcwd()
 pattern   = "*.pdf"
 output = ""
+    
 
 def convert_pdf_to_txt(path):
     rsrcmgr = PDFResourceManager()
@@ -37,6 +38,8 @@ def convert_pdf_to_txt(path):
     retstr.close()
     return text
 
+#MAIN CODE
+
 for dir,_,_ in os.walk(start_dir):
     files.extend(glob(os.path.join(dir,pattern))) 
 
@@ -53,6 +56,8 @@ print 'done processing pdf files, writing output text file.'
 
 with open('output.txt', 'w') as file_:
     file_.write(output.encode('utf-8'))
+    #content = [x.strip('\n') for x in file_.readlines()]
+    #sanitize_text(content)
 
 print 'translating pdf into h5 and json file'
 command = 'python preprocess.py'
