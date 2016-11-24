@@ -8,7 +8,7 @@ A paradigm shift is taking place and many, if not most publishers are struggling
 
 Although their complaints might be justified, we at Analogy believe that the problem also lies in the fact that most publishing enterprises stick to the old way of doing business. Writer’s write books, an editorial team does the editorial work, and an incredibly complex distribution chain sucks most of the revenue out of the final product.
 
-When we created Analogy within the [PublishingLab](http://www.publishinglab.nl)incubator, we decided to look past this old regime of doing business and aim our energy at creating a more efficient and sustainable production model. We analyzed the strategies of the winners and extracted business concepts from their money making systems.
+When we created Analogy within the [PublishingLab](http://www.publishinglab.nl) incubator, we decided to look past this old regime of doing business and aim our energy at creating a more efficient and sustainable production model. We analyzed the strategies of the winners and extracted business concepts from their money making systems.
 
 ---
 
