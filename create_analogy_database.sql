@@ -29,7 +29,7 @@ CREATE TABLE `selected_text` (
   `inserted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `score` int(255) NOT NULL DEFAULT '1',
   `active` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -80,7 +80,8 @@ CREATE TABLE `prints` (
 --
 ALTER TABLE `selected_text`
   ADD PRIMARY KEY (`selected_id`),
-  ADD UNIQUE KEY `selected_data` (`selected_data`);
+  ADD UNIQUE KEY `selected_data` (`selected_data`),
+  ADD FULLTEXT KEY `selected_data` (`selected_data`);
 
 --
 -- Indexen voor tabel `source_material`

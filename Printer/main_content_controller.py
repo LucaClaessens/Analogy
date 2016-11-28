@@ -9,7 +9,7 @@ nextInterval = 0.0   # Time of next recurring operation
 printer      = Adafruit_Thermal("/dev/tty.usbserial", 9600, timeout=5)
 #printer     = Adafruit_Thermal("/dev/ttyAMA0", 9600, timeout=5)
 #UNCOMMENT PREV LINE IF USING STRAIGHT FROM RASPI
-INTERVAL = 30
+INTERVAL	 = 5
 
 
 def _init():
@@ -18,14 +18,19 @@ def _init():
 	if content != "stop" or None:
 		data = content.output()
 		print("ran init");
-		#if data[2]: output_print(data[0],data[1][0],data[2])
-		#else: output_print(data[0],data[1],data[2])
+		if data[2]: 
+			#output_print(data[0],data[1][0],data[2])
+			INTERVAL = (content.update_interval() * 5000)
+			time.sleep(2)
+			#time.sleep(INTERVAL)
+		else: 
+			#output_print(data[0],data[1],data[2])
+			time.sleep(0.3)
+
 	else:
 		print("didn't update")
 	#update interval between runs based on print count and balance
-	INTERVAL = (content.update_interval() * 30)
-	#run script again after specified time
-	threading.Timer(INTERVAL, _init).start()
+	_init()
 
 def output_print(sentences,img_url,pubtype):
 	print(img_url)
@@ -63,6 +68,9 @@ def create_sentences(sentences,pubtype):
 	i = 0
 	p = 1
 	for sentence in sentences:
+		sentence = sentence.replace("\xe2\x80\x93", '-')
+		sentence = sentence.replace("\xe2\x80\x98", "'")
+		sentence = sentence.replace("\xe2\x80\x99", "'")
 		characters_written += len(sentence)
 		if not pubtype and i > 0 and p < 3: # not premium
 			if characters_written > 1000:
@@ -78,6 +86,16 @@ def create_sentences(sentences,pubtype):
 		printer.println(sentence)
 		printer.feed(2)
 		i += 1
-
+	if pubtype:
+		printer.feed(1)
+		printer.justify('C')
+		printer.println("-------------------")
+		printer.println("Thank you for contributing")
+		printer.feed(2)
+		printer.doubleHeightOn()
+		printer.println('ANALOGY')
+		printer.doubleHeightOff()
+		printer.justify('L')
+		printer.feed(1)
 
 _init()

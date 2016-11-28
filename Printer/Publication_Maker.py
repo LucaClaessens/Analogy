@@ -30,6 +30,7 @@ MIN_POOL = 15
 
 class Publication_Maker():
 
+
 	FREE = 0 
 	PUB = 0
 
@@ -69,13 +70,16 @@ class Publication_Maker():
 			self.handle_formation()
 
 	def update_print_count(self):
+
 		_s = "SELECT COUNT(*) FROM prints;"
 		self.TOTALPRINTED = self.return_sql_array(_s)[0]
+
 		_s = "SELECT COUNT(*) FROM prints WHERE premium = TRUE;"
 		self.PUBPRINTED = self.return_sql_array(_s)[0]
+
 		self.FREEPRINTED = self.TOTALPRINTED - self.PUBPRINTED
-		print(self.TOTALPRINTED)
-		print(self.PUBPRINTED)
+		print('total prints: {}'.format(self.TOTALPRINTED))
+		print('published prints: {}'.format(self.PUBPRINTED))
 
 	def analyze_content(self):
 		self.update_print_count()
@@ -135,32 +139,33 @@ class Publication_Maker():
 					_a.append(row[0])
 				return _a
 		except (MySQLdb.Error, MySQLdb.Warning, TypeError) as e:
-  			print(e)
-  			return None
+  			return e
 
   	def write_sql(self, _s):
   		cursor.execute(_s)
   		return None
 
 	def find_seed(self):
-		_s = """SELECT selected_data, score, RAND() * score 
-		AS weighted_score FROM selected_text WHERE score > 0 AND selected_length < 15
-		ORDER by RAND() * weighted_score DESC LIMIT 5"""
+		# WEGIGHTING BUG -> SEEDING WITH SAME NUMBER SO WEIGHT HAS NO EFFECT
+		#JUST RANDOMLY LOOP FOR HITS, SEEMS TOWORK BETTER.
+
+		_s = """SELECT selected_data FROM selected_text WHERE score > 0 AND selected_length < 15
+		ORDER by RAND() ASC LIMIT 5"""
 		cursor.execute(_s)
 		data=cursor.fetchall()
 		str_array = []
 		for row in data:
 			_p = row[0].split( )
-			str_array = str_array + _p
+			str_array.extend(_p)
 
 		for list_item in str_array:
 			_s = """SELECT image_id FROM images WHERE image_key= "{}" AND key_score >= 1""".format(list_item)
 			return [list_item, self.return_sql_array(_s)]
 
 	def create_premium_text(self,seed):	
-		_s = """SELECT `sentence_data` from source_material WHERE MATCH `sentence_data` AGAINST ("{}") LIMIT 10 """.format(seed);
+		_s = """SELECT `selected_data` , MATCH `selected_data` AGAINST ('{}') AS relevance FROM selected_text ORDER BY relevance DESC LIMIT 10""".format(seed);
 		result = self.return_sql_array(_s)
-		#print 'premium text item found: {}'.format(result)
+		print 'premium text items found: {} for seed: {}'.format(len(result), seed)
 		return result
 
 	def link_image(self,seed):
@@ -180,6 +185,7 @@ class Publication_Maker():
 				elif i > 250: 
 					print "can't find a seed quick enough, try to run again." 
 					return None
+			print('seed: {}'.format(seed));
 			self.selected_sentences = self.create_premium_text(seed[0])
 			self.selected_image = self.link_image(seed[0])
 			self.is_premium = True
@@ -190,7 +196,7 @@ class Publication_Maker():
 	
 	def commit(self):
 		db.commit()
-		db.close()
+		#db.close()
 
 	def output(self):
 		if self.locked is True:
@@ -203,7 +209,6 @@ class Publication_Maker():
 			else: _v = 0
 			_s = "INSERT INTO prints (premium) values  ({})".format(_v);
 			self.write_sql(_s)
-			self.commit()
 			print self.selected_sentences
 			print self.selected_image
 			print self.is_premium
