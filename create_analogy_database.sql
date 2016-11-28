@@ -43,7 +43,7 @@ CREATE TABLE `source_material` (
   `score` float NOT NULL,
   `active` tinyint(1) DEFAULT NULL,
   `inserted_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 

@@ -293,22 +293,24 @@
         ticks++;
         console.log(ticks);
         $('#frontdisplay').html(readtext[ticks]);
-        if (particleCount < 200 && (ticks % 5 == 1)) {
+        if (particleCount < 200 && (ticks % 6 == 1)) {
             console.log('add 1')
             particleCount ++;
-        } else if((particleCount > 200) && (ticks % (ticks/8) == 1)) {
+        } else if((particleCount > 200) && (ticks % (ticks/14) == 1)) {
             particleCount ++;
+        } else if ((particleCount > 300) && (ticks % (ticks/3) == 1)) {
+            particleCount -= 100;
         }
 
         if (particleCount < 150) {
-            if (ticks% 2 == 1){
+            if (ticks% 4 == 1){
             minDistance ++;
             console.log('1 closer')
             }
-        } else if (ticks % (ticks/8) == 1) {
+        } else if (ticks % (ticks/14) == 1) {
             minDistance --;
             if (minDistance < 100) {
-                minDistance = 250;
+                minDistance = 300;
             }
         }
 
