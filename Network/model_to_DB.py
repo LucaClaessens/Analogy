@@ -7,6 +7,7 @@ import argparse
 START_VAL = 1.0
 iterations = 0
 DEFAULT_CYCLES = 10
+backend = 'opencl'
 
 def check_positive(value):
     ivalue = int(value)
@@ -81,13 +82,14 @@ def drop_sentence():
 	return generate_sentence()
 
 def generate_sentence():
+	global backend
 	prime = random_line().replace("\00", "")
 	temp = "%.2f" % random.uniform(0.5, 0.95)
 	length = random.randint(150,300)+len(prime)
 	seed = random.randint(1000,9999)
 	if temp > 0.1:
-		command_string ='th sample.lua -gpu_backend opencl -length {} -temperature {} -start_text "{}" -sample {}'
-		command = command_string.format(length, temp, prime, seed)
+		command_string ='th sample.lua -gpu_backend {} -length {} -temperature {} -start_text "{}" -sample {}'
+		command = command_string.format(backend, length, temp, prime, seed)
 		returnvalue = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
 		val = returnvalue.rsplit(prime)
 

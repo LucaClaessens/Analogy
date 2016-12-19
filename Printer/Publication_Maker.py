@@ -3,52 +3,46 @@ import socket, MySQLdb
 from PIL import Image
 from random import randint, randrange
 
-#db = MySQLdb.connect(
-#	unix_socket = '/Applications/MAMP/tmp/mysql/mysql.sock',
-#	host = 'localhost',
-#	user = 'root', 
-#	passwd = 'root', 
-#	db = 'Analogy')
-
 db = MySQLdb.connect(
-	host = 'luca.local',
-	port = 3306,
-	user = 'luca', 
-	passwd = 'Analogy',
-	db = 'Analogy')
+	host 					= 'luca.local',
+	port 					=  3306,
+	user 					= 'luca', 
+	passwd 					= 'Analogy',
+	db 						= 'Analogy'
+	)
 
 cursor = db.cursor()
 
 # Think of better way to distribute min/max values
-SBMAX = 1.5
-SBMIN = 0.0
-MIN_PRINT_BEFORE_BALANCE = 10
-BALANCE = 0.333
-MIN_AVAIL = 8
-MIN_POOL = 15
+SBMAX 						= 1.5
+SBMIN 						= 0.0
+MIN_PRINT_BEFORE_BALANCE	= 10
+BALANCE 					= 0.333
+MIN_AVAIL 					= 8
+MIN_POOL 					= 15
 
 
 class Publication_Maker():
 
 
-	FREE = 0 
-	PUB = 0
+	FREE 					= 0 
+	PUB 					= 0
 
-	FREEPRINTED = 0
-	PUBPRINTED = 0
-	TOTALPRINTED = 0
+	FREEPRINTED 			= 0
+	PUBPRINTED 				= 0
+	TOTALPRINTED 			= 0
 
-	POOL = 0
-	tier = None
-	search_pattern = False
-	pref_premium = False
-	seeded = False
-	locked = False
+	POOL 					= 0
+	tier 					= None
+	search_pattern 			= False
+	pref_premium 			= False
+	seeded 					= False
+	locked		 			= False
 
 	def __init__(self,*args):
 
 		#output variables have to be defined first
-		self.is_premium = None
+		self.is_premium 	= None
 		self.selected_sentences = []
 		self.selected_image = ""
 
@@ -192,7 +186,6 @@ class Publication_Maker():
 		else: 
 			_s = "SELECT sentence_data FROM source_material WHERE score < {} ORDER BY RAND() LIMIT 5".format(SBMIN)
 			self.selected_sentences = self.return_sql_array(_s)
-		#print("I'm printing premium? {}\nSelected sentences array: {}".format(premium, self.selected_sentences))
 	
 	def commit(self):
 		db.commit()

@@ -8,6 +8,7 @@ import webbrowser as wb
 
 HOST_NAME = 'luca.local'
 PORT_NUMBER = 8880
+START_MAMP = True
 
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -50,8 +51,9 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 if __name__ == '__main__':
         server_class = BaseHTTPServer.HTTPServer
         httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
-        subprocess.call('open /Applications/MAMP/MAMP.app/', shell=True)
-        wb.get('chrome %s').open_new_tab('http://localhost:8888/Editing/selection.html')
+        if START_MAMP:
+                subprocess.call('open /Applications/MAMP/MAMP.app/', shell=True)
+                wb.get('chrome %s').open_new_tab('http://localhost:8888/Editing/selection.html')
         print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
         try:
                 httpd.serve_forever()
