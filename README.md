@@ -26,6 +26,8 @@ Since our interfaces are web based we decided to go with a simple MySQL database
 
 For now, go to your preferred hosting environment and run the `create_analogy_database.sql` file in phpMyAdmin, this will set up the database for you (empty). If you wish to prepopulate the database with some of our testing data, run `populate_analogy_database.sql`instead.
 
+Configuration of all variables can be done in the `analogy_config.ini` file, here you can also change your mySQL settings.
+
 ## System setup
 
 You'll need to install the header files for Python 2.7 and the HDF5 library. On Ubuntu you should be able to install
@@ -116,12 +118,20 @@ Whilst you can use any text file for training models, Analogy ships with a pdf t
 python Analogy.py pdfconvert
 ```
 
+If you prefer to work with textfiles, please merge all your text into one file and from `text-processing-tools` run
+
+```bash
+python preprocess.py --input_txt textfile.txt
+```
+
 This will produce files `analogy.h5` and `analogy.json` in the `text-processing-tools` folder, you can move these to `Network/data`  to be picked up by the training script.
 
 ## Step 2: Train the model
 After preprocessing the data, you'll need to train the model. This will be the slowest step. While training, move the the `Network` directory.
 
-You can run the training script like this:
+before training, we will have to set some configurations in the `analogy_config.ini` file again, please choose whether or not to run in gpu mode by setting `cpu_only` to either `True` or `False` and set your backend to either `opencl` or `cuda`.
+
+Now, you can run the training script like this:
 
 ```bash
 th train.lua
@@ -137,24 +147,23 @@ You can change the RNN model type, hidden state size, and number of RNN layers l
 th train.lua -input_h5 my_data.h5 -input_json my_data.json -model_type rnn -num_layers 3 -rnn_size 256
 ```
 
-By default this will run in GPU mode using OpenCL; to run in CPU-only mode, add the flag `-gpu -1`.
-
-To run with CUDA, add the flag `-gpu_backend cuda`.
-
 ## Step 3: Sample from the model
-After training a model, you can generate new text.
+After training a model, you can generate new text, at a set interval, your training script will tell you a new checkpoint has been created, with additional information on training&validation loss.
+
+please choose one of the checkpoints stored in the `checkpoints` folder and set it's name to the `checkpoint` variable in `analogy_config.ini`, the network will now sample from this checkpoint.
+
 if you don't want to tweak any settings, you can go to the `Network` directory of the project and run:
 
 ```bash
-python model_to_DB.py --cycles 10
+python model_to_DB.py
 ```
 
-This will load the latest trained checkpoint from the previous step, sample it,
+This will load the checkpoint from the previous step, sample it,
 and print the results to the previously configured database.
 
-Within the `model_to_DB.py` file, you can change the mySQL database you're connecting to, as well as the backend you're running the network on.
+By default, the network will run 15 cycles and output them to the database, but the amount of cycles you want to run can also be changed in the configuration file.
 
-the `-c` flag controls how many cycles you will run, every cycle outputs 1 result to the database, during every cycle the script will send a random set of values together with a warmup sentence from  `primetext.txt` to the network, in an attempt to generate new text.
+The  `sample_cycles` setting controls how many cycles you will run. Every cycle outputs 1 result to the database, during every cycle the script will send a random set of values together with a warmup sentence from  `primetext.txt` to the network, in an attempt to generate new text.
 
 ## Production
 
@@ -174,7 +183,7 @@ on a remote setup you will have to activate the listening httpserver manually by
 
 after setting up the servers, you can simply visit the address from any device and start editing away, all the edits will be captured in the database.
 
-the editing pages will be located in `editing/selection.html` and `editing/image_selection.html`, from a MAMP perspective this would translate to http://localhost:8888/Analogy/web-tools/editing/selection.html
+the editing pages will be located in `editing/selection.html` and `editing/image_selection.html`.
 
 ##Printing
 
@@ -191,5 +200,5 @@ You can also control it straight from your computer after installing the PL2303 
 [MacOSX 10.9 to 10.11](https://cdn-shop.adafruit.com/product-files/954/PL2303_MacOSX_1_6_0_20151022.zip) ,
 [Windows XP/Vista/7/8](https://cdn-shop.adafruit.com/product-files/954/PL2303_Prolific_DriverInstaller_v1_12_0.zip)
 
-depending on the way you're interfacing with the printer you want to comment/uncomment the right connection type in the header of the `main_content_controller.py` file.
+depending on the way you're interfacing with the printer you want to set the preferred connection type by changing `use_serial` to either one of the subsequent serials set in the `analogy_config.ini` file.
 
