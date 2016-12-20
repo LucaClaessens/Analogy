@@ -4,11 +4,22 @@ Analogy main controller
 
 import subprocess
 import argparse
+from ConfigParser import SafeConfigParser
 import os
 import sys
 
+parser = SafeConfigParser()
+parser.read('analogy_config.ini')
+
+cpu_only = parser.get('sampling','cpu_only')
+gpu = 0
+
+if cpu_only is True :
+	gpu = -1
+
 COMMAND_MAP = {'pdfconvert' : ['text-processing-tools', 'python pdf_to_trainingdata.py'],
-               'setup' : ['Network', 'python initialize_servers.py']}
+               'setup' : ['Network', 'python initialize_servers.py'],
+               'train' : ['Network', 'th train.lua -gpu {} -gpu_backend {}'.format(gpu, parser.get('sampling','backend'))]}
 
 ARGPARSER = argparse.ArgumentParser(description='This is the main controller for Analogy. \
     \n\aHere you can control all parts of the Publishing system.')
@@ -21,7 +32,6 @@ ARGS = ARGPARSER.parse_args()
 
 ORIGWD = os.getcwd()
 C_MAP = COMMAND_MAP[ARGS.command]
-
 
 def execute(command):
     os.chdir(os.path.join(os.path.abspath(sys.path[0]), C_MAP[0]))

@@ -3,16 +3,20 @@ from Publication_Maker import Publication_Maker
 from Adafruit_Thermal import *
 from random import randrange
 from PIL import Image
+from ConfigParser import SafeConfigParser
 import urllib, cStringIO , time
+
+
+parser = SafeConfigParser()
+parser.read('../analogy_config.ini')
+
+serial = parser.get('printer','use_serial')
+serialport = parser.get('printer',serial)
+baudrate = parser.get('printer','baudrate')
 
 nextInterval = 0.0   # Time of next recurring operation
 
-#DIRECT COMPUTER CONNECTION OVER USBSERIAL
-printer      = Adafruit_Thermal("/dev/tty.usbserial", 9600, timeout=5)
-
-#RASPI OVER USB SERIAL 
-#(NO TTY WITH RASPI 3: WILL OVERDRIVE THE TTL CHIP ON THE PRINTER)
-#printer     = Adafruit_Thermal("/dev/ttyAMA0", 9600, timeout=5)
+printer      = Adafruit_Thermal(serialport, baudrate, timeout=5)
 
 INTERVAL	= 5
 

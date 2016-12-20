@@ -1,4 +1,4 @@
-require 'torch'
+  require 'torch'
 require 'nn'
 require 'optim'
 
@@ -13,11 +13,11 @@ local cmd = torch.CmdLine()
 -- Dataset options
 cmd:option('-input_h5', 'data/analogy.h5')
 cmd:option('-input_json', 'data/analogy.json')
-cmd:option('-batch_size', 64)
-cmd:option('-seq_length', 64)
+cmd:option('-batch_size', 32)
+cmd:option('-seq_length', 32)
 
 -- Model options
-cmd:option('-init_from', 'checkpoints/analogy_cp_9000.t7')
+cmd:option('-init_from', '')
 cmd:option('-reset_iterations', 3)
 cmd:option('-model_type', 'lstm')
 cmd:option('-wordvec_size', 64)
@@ -39,8 +39,8 @@ cmd:option('-checkpoint_every', 1000)
 cmd:option('-checkpoint_name', 'checkpoints/analogy_cp')
 
 -- Benchmark options
-cmd:option('-speed_benchmark', 1)
-cmd:option('-memory_benchmark', 1)
+cmd:option('-speed_benchmark', 0)
+cmd:option('-memory_benchmark', 0)
 
 -- Backend options
 cmd:option('-gpu', 0)

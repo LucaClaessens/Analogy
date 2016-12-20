@@ -2,36 +2,35 @@ import random
 import subprocess
 import MySQLdb
 import atexit
-import argparse
+from ConfigParser import SafeConfigParser
 
-START_VAL = 1.0
 iterations = 0
-DEFAULT_CYCLES = 10
-backend = 'opencl'
 
-def check_positive(value):
-    ivalue = int(value)
-    if ivalue <= 0:
-         raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
-    return ivalue
+parser = SafeConfigParser()
+parser.read('../analogy_config.ini')
 
-parser = argparse.ArgumentParser(description='How many cycles should we run?')
-parser.add_argument("-c", "--cycles", type=check_positive, default=DEFAULT_CYCLES,
-                    help="The number of sentences to create")
+## LOAD VARIABLES FROM CONFIGURATION FILE
 
-args = parser.parse_args()
-max_iterations = args.cycles
+START_VAL = parser.get('sampling','start_value')
+
+backend = parser.get('sampling', 'backend')
+checkpoint = parser.get('sampling', 'checkpoint')
+max_iterations = parser.get('sampling','sample_cycles')
+cpu_only = parser.get('sampling','cpu_only')
+gpu = 0
 
 db = MySQLdb.connect(
-	unix_socket = '/Applications/MAMP/tmp/mysql/mysql.sock',
-    host = 'localhost', 
-    user = 'root', 
-    passwd = 'root', 
-    db = 'Analogy')
+	unix_socket = parser.get('database','unix_socket'),
+    host = parser.get('database','host'), 
+    user = parser.get('database','user'), 
+    passwd = parser.get('database','passwd'), 
+    db = parser.get('database','db')
+    )
 
-cursor = db.cursor()
 db.escape_string("'")
 db.escape_string('"')
+
+cursor = db.cursor()
 
 def exit_handler():
 	db.commit()
@@ -82,16 +81,18 @@ def drop_sentence():
 	return generate_sentence()
 
 def generate_sentence():
-	global backend
+	global backend, checkpoint, gpu
+
 	prime = random_line().replace("\00", "")
 	temp = "%.2f" % random.uniform(0.5, 0.95)
 	length = random.randint(150,300)+len(prime)
 	seed = random.randint(1000,9999)
 	if temp > 0.1:
-		command_string ='th sample.lua -gpu_backend {} -length {} -temperature {} -start_text "{}" -sample {}'
-		command = command_string.format(backend, length, temp, prime, seed)
+		command_string ='th sample.lua -gpu {} -gpu_backend {} -length {} -temperature {} -start_text "{}" -sample {} -checkpoint {}'
+		command = command_string.format(gpu, backend, length, temp, prime, seed, checkpoint)
 		returnvalue = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
 		val = returnvalue.rsplit(prime)
+		print val;
 
 		if len(val) >= 2 and val[1].strip():
 			returnvalue = returnvalue.rsplit(prime)[1].split('.')[0]
@@ -103,8 +104,8 @@ def generate_sentence():
 
 		if len(returnvalue) > 50:	
 			if len(words[0]) < 3 or words[0].isdigit(): del words[0]
-			badWords = ['the','any','of','and','a','as','to','1','in','by']
-			while words[-1] in badWords or words[-1].endswith('\t\n'):
+			badWords = parser.get('sampling','bad_end_words')
+			while words[-1] in badWords.splitlines() or words[-1].endswith('\t\n'):
 				words = words[0:-1]
 			returnvalue = upcase_first_letter(" ".join(words)+".")
 			print returnvalue
@@ -112,5 +113,8 @@ def generate_sentence():
 			commit_to_db(returnvalue)
 		else: return drop_sentence()
 	else: return drop_sentence()
+
+if cpu_only is True :
+	gpu = -1
 
 generate_sentence()

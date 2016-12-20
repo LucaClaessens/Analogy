@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import time
 import BaseHTTPServer
 import subprocess
@@ -22,7 +21,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 s.send_header("Content-type", "text/html")
                 s.send_header("Access-Control-Allow-Origin", "*")
                 s.end_headers()
-                s.wfile.write("<html><head><title>Title goes here.</title></head>")
+                s.wfile.write("<html><head><title>ANALOGY</title></head>")
                 s.wfile.write("<body><form action='.' method='POST'><input name='x' value='1' /><input type='submit' /></form><p>This is a test.</p>")
                 # If someone went to "http://something.somewhere.net/foo/bar/",
                 # then s.path equals "/foo/bar/".
@@ -38,7 +37,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 for key, value in post_data.iteritems():
 
                         print 'key {}, value {}'.format(key,value[0])
-                        cmd = "python model_to_DB.py -c {}".format(value[0])
+                        cmd = "python model_to_DB.py")
                         subprocess.call(cmd, shell=True)
 
                 s.send_response(200)

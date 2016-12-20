@@ -20,7 +20,14 @@ When we created Analogy within the [PublishingLab](http://www.publishinglab.nl) 
 
 ## Installation
 
+## Database setup
+
+Since our interfaces are web based we decided to go with a simple MySQL database, Analogy is preconfigured to work with MAMP in a local environment, but if you want to run externally that's also possible.
+
+For now, go to your preferred hosting environment and run the `create_analogy_database.sql` file in phpMyAdmin, this will set up the database for you (empty). If you wish to prepopulate the database with some of our testing data, run `populate_analogy_database.sql`instead.
+
 ## System setup
+
 You'll need to install the header files for Python 2.7 and the HDF5 library. On Ubuntu you should be able to install
 like this:
 
@@ -150,8 +157,6 @@ Within the `model_to_DB.py` file, you can change the mySQL database you're conne
 the `-c` flag controls how many cycles you will run, every cycle outputs 1 result to the database, during every cycle the script will send a random set of values together with a warmup sentence from  `primetext.txt` to the network, in an attempt to generate new text.
 
 ## Production
-
-Since our interfaces are web based we decided to go with a simple MySQL database, in phpMyAdmin you can run the `create_analogy_database.sql` file, this should set up the database for you (empty). If you wish to prepopulate the database with some of our testing data, run `populate_analogy_database.sql`instead. 
 
 To set up the production side of things, you can move the `web-tools` folder into your hosting environment. Once this is done, navigate to the `Network` folder and open the  `initialize_servers.py` file, please note that Analogy is preconfigured to run with MAMP, so if you're using another hosting environment please disable the `RUN_MAMP` flag. 
 

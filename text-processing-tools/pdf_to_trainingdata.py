@@ -29,7 +29,6 @@ def convert_pdf_to_txt(path):
     for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages, password=password,caching=caching, check_extractable=True):
         interpreter.process_page(page)
         currpage +=1
-        #print 'processed page {}'.format(currpage)
 
     text = retstr.getvalue()
 
@@ -37,8 +36,6 @@ def convert_pdf_to_txt(path):
     device.close()
     retstr.close()
     return text
-
-#MAIN CODE
 
 for dir,_,_ in os.walk(start_dir):
     files.extend(glob(os.path.join(dir,pattern))) 
@@ -56,8 +53,6 @@ print 'done processing pdf files, writing output text file.'
 
 with open('output.txt', 'w') as file_:
     file_.write(output.encode('utf-8'))
-    #content = [x.strip('\n') for x in file_.readlines()]
-    #sanitize_text(content)
 
 print 'translating pdf into h5 and json file'
 command = 'python preprocess.py'
