@@ -12,13 +12,12 @@ When we created Analogy within the [PublishingLab](http://www.publishinglab.nl) 
 
 ---
 
++ [Installation](#user-content-installation)
 + [Content creation](#user-content-content-creation)
 + [Production](#user-content-production) 
 + [Printing](#user-content-printing) 
 
-# Content creation
-
-## Installation
+# Installation
 
 ## Database setup
 
@@ -109,6 +108,8 @@ after installing the frameworks needed to get your network up and running, you a
 Before we can start generating content though, we need a place for the information to flow.
 
 To train a model and use it to generate new text, you'll need to follow three steps.
+
+# Content creation
 
 ## Step 1: Preprocess the data
 
