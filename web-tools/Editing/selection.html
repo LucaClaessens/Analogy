@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Text selection tool | Analogy</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700,800" rel="stylesheet">
+    <script src="jquery.min.js"></script>
+    <style>
+    * {
+        box-sizing: border-box;
+    }
+    
+    body,
+    html {
+        margin: 0 auto;
+        padding: 0 auto;
+        overflow: none;
+        font-family: raleway, sans-serif;
+        font-weight: 800;
+        font-size: 35px;
+        letter-spacing: 1px;
+        line-height: 45px;
+        background-color: black;
+        color: white;
+    }
+    
+    h6 {
+        font-weight: 400;
+    }
+    
+    .container {
+        padding: 5% 5% 5% 5%;
+    }
+    
+    .selected {
+        background-color: #CC33FF;
+    }
+    
+    .noselect {
+        -webkit-touch-callout: none;
+        /* iOS Safari */
+        -webkit-user-select: none;
+        /* Chrome/Safari/Opera */
+        -khtml-user-select: none;
+        /* Konqueror */
+        -moz-user-select: none;
+        /* Firefox */
+        -ms-user-select: none;
+        /* Internet Explorer/Edge */
+        user-select: none;
+        /* Non-prefixed version, currently
+        not supported by any browser */
+    }
+    
+    #textselect {
+        display: none;
+    }
+    
+    #winbackdrop {
+        display: none;
+        top: 0;
+        position: fixed;
+        z-index: 8;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    #windialogue {
+        z-index: 9;
+        display: none;
+        left: 10%;
+        position: fixed;
+        top: 20%;
+        width: 80%;
+        background-color: black;
+        padding: 2rem;
+        border: 5px solid white;
+        min-height: 40%;
+    }
+    
+    .wintop>h2 {
+        margin-top: 0px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    
+    .wintop>h6 {
+        margin-top: 10px;
+        text-align: center;
+        line-height: 35px;
+    }
+    
+    .wintop .close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+    
+    .winmid input {
+        position: relative;
+        margin-top: 50px;
+        left: 10%;
+        width: 80%;
+        border-style: solid;
+        text-align: center;
+        padding: 10px;
+        font-size: 30px;
+        background-color: #000000;
+        border-color: #ffffff;
+        color: #ffffff;
+        border-width: 5px;
+        border-radius: 0px;
+        box-shadow: 0px 0px 5px 0px rgba(42, 42, 42, .0);
+    }
+    
+    .winmid input:focus {
+        outline: none;
+    }
+    
+    .loading {
+        display: none;
+        position: absolute;
+        z-index: 10;
+        left: 50%;
+        top: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        font-size: 20px;
+    }
+
+    .loading>p{
+        padding:0;
+        margin:0;
+    }
+    
+    .spinner {
+        width: 150px;
+        height: 150px;
+        margin: 100px auto;
+        background-color: #333;
+        border-radius: 100%;
+        -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+        animation: sk-scaleout 1.0s infinite ease-in-out;
+    }
+    
+    @-webkit-keyframes sk-scaleout {
+        0% {
+            -webkit-transform: scale(0)
+        }
+        100% {
+            -webkit-transform: scale(1.0);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes sk-scaleout {
+        0% {
+            -webkit-transform: scale(0);
+            transform: scale(0);
+        }
+        100% {
+            -webkit-transform: scale(1.0);
+            transform: scale(1.0);
+            opacity: 0;
+        }
+    }
+    </style>
+</head>
+
+<body>
+    <div class="loading">
+        <p>please wait while the network generates new sentences.</p>
+        <div class="spinner"></div>
+    </div>
+    <div class="container">
+        <div id="textdomain" class="noselect"></div>
+    </div>
+    <div id="winbackdrop"></div>
+    <div id="windialogue">
+        <div class="wintop">
+            <h2>CONGRATULATIONS</h2>
+            <h6>You can pick up a premium version of the publication at the counter with the following code</h6>
+            <div class="close">X</div>
+        </div>
+        <div class="winmid">
+            <input id="couponvalue" type="text" name="" value="" placeholder="">
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/mark.js/8.4.0/mark.min.js"></script>
+<script>
+// to-do : make these guys be read from .ini file??
+
+var node_list;
+var start_point = 0;
+var end_point = 0;
+var negative_selection = false;
+var MIN_DISTANCE = 4;
+var entries = new Array;
+
+String.prototype.hashCode = function() {
+    var hash = 0,
+        i, chr, len;
+    if (this.length === 0) return hash;
+    for (i = 0, len = this.length; i < len; i++) {
+        chr = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+};
+
+//to-do : test if json encoding works
+function init() {
+    $.get('php/validate_quantity.php', function(data) {
+        if (data != "True") {
+            $('.loading').fadeIn(2000);
+            $.post('http://'+data.config_ip+':'+data.config_port, {
+                quantity: 10 //ignored for now
+            }, function(data, textStatus, xhr) {
+                $('.loading').fadeOut(2000);
+                window.location.href = 'selection.html'
+            }).error(function() {
+                console.log('loading..');
+            });
+        } else {
+            load_text()
+        }
+    },'json');
+}
+
+function load_text() {
+    var text = "";
+    $.get('php/read_origin_db.php', function(data) {
+        console.log(data)
+        for (var i = 0; i < data.length; i++) {
+            blocks = data[i].sentence_data.split(" ")
+            entries.push(parseInt(data[i].sentence_id))
+            for (var j = 0; j < blocks.length; j++) {
+                text += "<span>" + blocks[j] + " </span>";
+            }
+        }
+        $('#textdomain').html(text);
+        $('#textdomain').fadeIn('slow', function() {});
+    }, 'json');
+}
+
+function post_to_selected(selected_length, selected_data, entries) {
+    var length = parseInt(selected_length);
+    var data = selected_data;
+    $.post('php/write_origin_db.php', {
+        match: selected_data,
+        sentences: entries
+    }, function(data, textStatus, xhr) {
+        console.log(data)
+    });
+
+    $.post('php/write_selected_db.php', {
+        selected_length: length,
+        selected_data: data
+    }, function(data, textStatus, xhr) {
+        console.log(data)
+    });
+}
+
+function clear_selection(state) {
+    if (state == false) {
+        //alert('please select more words.')
+    }
+    start_point = 0, end_point = 0;
+    selected_data = "";
+    negative_selection = false;
+    $('.start_point').removeClass('start_point');
+    $('.end_point').removeClass('end_point');
+    $('span').removeClass('selected');
+}
+
+function see_if_winner(seed) {
+    if (Math.floor(Math.random() * 666) < 30) {
+        $('#couponvalue').val(seed.hashCode());
+        $('#windialogue').fadeIn('slow');
+        $('#winbackdrop').fadeIn('slow');
+    } else {
+        return false;
+    }
+}
+
+function handleSelection(debug) {
+
+    if (debug) {
+        console.log('debug module used');
+        distance = 10;
+        return $('#textdomain').fadeOut('slow', function() {
+            clear_selection();
+            post_to_selected(distance, debug, entries)
+            see_if_winner(debug);
+            $('#textdomain').html('');
+            init();
+        });
+    }
+
+    var selected_data = "";
+    var distance;
+
+    if (!negative_selection) {
+        console.log('positive select');
+        distance = ((end_point + 1) - start_point);
+        for (var i = start_point; i < end_point + 1; i++) {
+            selected_data += $('span').eq(i).html();
+        }
+    } else {
+        console.log('negative select');
+        distance = ((start_point + 1) - end_point);
+        for (var i = end_point; i < start_point + 1; i++) {
+            selected_data += $('span').eq(i).html();
+        }
+    }
+
+    console.log('distance:' + distance + ' steps.');
+    console.log('selection:"' + selected_data + '".');
+
+    if (!(end_point == 0 && start_point == 0 || end_point == start_point || distance < MIN_DISTANCE)) {
+
+        selected_data = selected_data.slice(0, -1)
+
+        $('#textdomain').fadeOut('slow', function() {
+            clear_selection();
+            post_to_selected(distance, selected_data, entries)
+            if (Math.floor(Math.random() * 1000) > 950) {
+                window.location.href = 'image_selection.html'
+                console.log('relocate');
+                return false;
+            } else {
+                entries = new Array;
+                see_if_winner(selected_data);
+                $('#textdomain').html('');
+                init();
+            }
+        });
+
+    } else {
+        return clear_selection(false);
+    }
+}
+
+function highlightSelected(x, y) {
+    $('span').each(function() {
+        // check if is inside boundaries
+        if (!(
+                x <= $(this).offset().left || x >= $(this).offset().left + $(this).outerWidth() ||
+                y <= $(this).offset().top || y >= $(this).offset().top + $(this).outerHeight()
+            )) {
+            $(this).addClass('end_point');
+            end_point = document.getElementsByClassName('end_point')[0];
+            node_list = Array.prototype.slice.call(document.getElementById('textdomain').children)
+            end_point = (node_list.indexOf(end_point));
+        }
+    });
+}
+
+function colour_items() {
+    $('span').removeClass('selected');
+    if (start_point < end_point) {
+        for (var i = start_point; i < end_point + 1; i++) {
+            $('span').eq(i).addClass('selected');
+        }
+    } else if (end_point < start_point) {
+        for (var i = end_point; i < start_point + 1; i++) {
+            $('span').eq(i).addClass('selected');
+            negative_selection = true;
+        }
+    }
+}
+
+/*  |-------\ MOUSE EVENTS /------| */
+
+$(document).on('mousedown', 'span', function(e) {
+    $(this).addClass('start_point');
+    start_point = document.getElementsByClassName('start_point')[0];
+    node_list = Array.prototype.slice.call(document.getElementById('textdomain').children)
+    start_point = (node_list.indexOf(start_point));
+})
+
+$(document).on('mouseover', 'span', function(e) {
+    isDragging = true;
+    if (e.buttons == 1) {
+        if ($('.end_point').length > 0) {
+            $('.end_point').removeClass('end_point');
+        }
+        $(this).addClass('end_point');
+        end_point = document.getElementsByClassName('end_point')[0];
+        node_list = Array.prototype.slice.call(document.getElementById('textdomain').children)
+        end_point = (node_list.indexOf(end_point));
+
+        colour_items();
+    }
+})
+
+$(document).on('mouseup', function() {
+    var wasDragging = isDragging;
+    isDragging = false;
+    if (wasDragging) {
+        handleSelection();
+    }
+});
+
+/*  |-------\ TOUCH EVENTS /------| */
+
+$(document).on('touchstart', 'span', function(e) {
+    e.preventDefault();
+    $(this).addClass('start_point');
+    start_point = document.getElementsByClassName('start_point')[0];
+    node_list = Array.prototype.slice.call(document.getElementById('textdomain').children)
+    start_point = (node_list.indexOf(start_point));
+
+}).on('touchmove', 'span', function(e) {
+    e.preventDefault();
+    var touch = e.originalEvent.touches[0];
+    if ($('.end_point').length > 0) {
+        $('.end_point').removeClass('end_point');
+    }
+    highlightSelected(touch.clientX, touch.clientY);
+    $('span').removeClass('selected');
+    colour_items();
+
+}).on('touchend', 'span', function(e) {
+    $('body').css('background-color', 'black');
+    e.preventDefault();
+    handleSelection();
+})
+
+$('.close').click(function(event) {
+    $('#windialogue').fadeOut();
+    $('#winbackdrop').fadeOut();
+});
+
+jQuery(document).ready(function($) {
+    init()
+});
+</script>
+
+</html>

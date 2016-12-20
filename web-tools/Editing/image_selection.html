@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Image selection</title>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700,800" rel="stylesheet">
+    <style type="text/css" media="screen">
+    * {
+        box-sizing: border-box;
+    }
+    
+    body,
+    html {
+        margin: 0 auto;
+        padding: 0 auto;
+        overflow: none;
+        font-family: raleway, sans-serif;
+        font-weight: 400;
+        background-color: black;
+    }
+    
+    .img_container {
+        top: 50%;
+        left: 50%;
+        position: absolute;
+        max-height: 70%;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    
+    .img_container>img {
+        display: none;
+        width: 100%;
+    }
+    
+    div[class^="sel_"],
+    div[class*="sel_"] {
+        background-color: white;
+        width: auto;
+        min-width: 100px;
+        max-width: 200px;
+        height: 50px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: black;
+        text-align: center;
+        padding: 10px;
+        line-height: 25px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    div[class^="sel_"]:hover,
+    div[class*="sel_"]:active,
+    div[class*="sel_"]:hover {
+        background-color: black;
+        color: white;
+        border: 2px solid white;
+        transition: all .2s;
+    }
+    
+    .placeholder {
+        top: 50%;
+        left: 50%;
+        position: absolute;
+        font-size: 150px;
+        color: white;
+        font-weight: 800;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    
+    .button {
+        display: none;
+    }
+    </style>
+    <script src="jquery.min.js"></script>
+</head>
+
+<body ontouchstart="">
+    <div class="img_container">
+        <img id="dyn_img"></img>
+    </div>
+    <div id="selection">
+        <div class="button sel_top"></div>
+        <div class="button sel_right"></div>
+        <div class="button sel_bot"></div>
+        <div class="button sel_left"></div>
+    </div>
+    <div class="placeholder"></div>
+    <script>
+    Array.prototype.unique = function() {
+        var r = new Array();
+        o: for (var i = 0, n = this.length; i < n; i++) {
+            for (var x = 0, y = r.length; x < y; x++) {
+                if (r[x] == this[i]) {
+                    continue o;
+                }
+            }
+            r[r.length] = this[i];
+        }
+        return r;
+    }
+
+    function request_image(query) {
+
+        var requested_set;
+
+        $.getJSON('themelist.json', function(json, textStatus) {
+            requested_set = json.themes.sort(function() {
+                return .5 - Math.random()
+            }).slice(0, 2);
+            console.log(requested_set);
+
+            var token = 'd7d8c0425e2c7457abb4bf0e85ed2304';
+            var url = 'https://api.flickr.com/services/rest/?format=json&sort=random&method=flickr.photos.search&tags=' + requested_set + '&tag_mode=all&api_key=' + token + '&license=4,5,6,7&jsoncallback=?';
+
+            $.getJSON(url,
+                function(data) {
+
+                    console.log('looked up: ',url);
+
+                    var img = data.photos.photo[(1 + Math.floor(Math.random() * data.photos.photo.length))];
+                    if (img && img.farm) {
+                        var imageurl = 'https://farm' + img.farm + '.staticflickr.com/' + img.server + '/' + img.id + '_' + img.secret + '.jpg';
+                        $("#dyn_img").load(
+                            function() {
+                                $('#dyn_img').fadeIn('slow', function() {
+                                    handle_resize();
+                                    $('.button').fadeIn('fast');
+                                });
+                            }).attr('src', imageurl);
+                    } else {
+                        console.log('not found, looking for other image in stack!');
+                        return request_image();
+                    }
+                });
+
+        });
+    }
+
+    function pull_choices() {
+        $.get('php/pull_choices.php', function(data) {
+            if(data != "reload"){
+            console.log(data);
+            var construct = new Array();
+            //populate construct
+            for (var i = 0; i < data.length; i++) {
+                blocks = data[i].selected_data.split(" ")
+                console.log("iteration: " + i)
+                for (var j = 0; j < blocks.length; j++) {
+                    if (blocks[j].length > 3) {
+                        blocks[j] = blocks[j].replace(".", "")
+                        construct.push(blocks[j])
+                    }
+                }
+                if (construct.length > 4) {
+                    break;
+                };
+            }
+
+            var shuffled = construct.unique().sort(function() {
+                return .5 - Math.random()
+            });
+            construct = shuffled.slice(0, 4);
+            $('.sel_top').html(shuffled[0]);
+            $('.sel_right').html(shuffled[1]);
+            $('.sel_bot').html(shuffled[2]);
+            $('.sel_left').html(shuffled[3]);
+            construct = construct.join(" ");
+            console.log(construct);
+            request_image(construct);
+        } else {
+            //too little entries,we need more text
+            window.location.href = 'selection.html'
+        }
+        }, 'json');
+    }
+
+    function handle_resize() {
+        var imgbox = $('#dyn_img');
+
+        var o_top = imgbox.offset().top;
+        var o_mid = imgbox.offset().top + (imgbox.height() / 2);
+        var o_left = imgbox.offset().left;
+        var o_bottom = imgbox.offset().top + imgbox.height();
+        var o_right = imgbox.offset().left + imgbox.width();
+        var o_center = imgbox.offset().left + (imgbox.width() / 2);
+
+        $('.sel_top').css({
+            position: 'absolute',
+            left: o_left,
+            top: o_top,
+            transform: 'translateX(-50%) translateY(-50%)'
+        });
+
+        $('.sel_right').css({
+            position: 'absolute',
+            left: o_right,
+            top: o_top,
+            transform: 'translateX(-50%) translateY(-50%)'
+        });
+
+        $('.sel_left').css({
+            position: 'absolute',
+            left: o_left,
+            top: o_bottom,
+            transform: 'translateX(-50%) translateY(-50%)'
+        });
+
+        $('.sel_bot').css({
+            position: 'absolute',
+            left: o_right,
+            top: o_bottom,
+            transform: 'translateX(-50%) translateY(-50%)'
+        });
+
+    }
+
+    function process_selection(word, src) {
+        console.log(word, src)
+        $('#dyn_img').fadeOut('slow');
+        $('.placeholder').html(word);
+        $('.placeholder').fadeIn('slow');
+        $.post('php/write_image_db.php', {
+            text: word,
+            source: src
+        }, function(data, textStatus, xhr) {
+            console.log(data);
+            $('.placeholder').fadeOut('slow', function() {
+                $('.placeholder').html('');
+            });
+            if (Math.floor(Math.random()*1000) > 950){
+            window.location.href = 'selection.html'
+            console.log('relocate');
+            return false;
+            } else {
+            pull_choices();
+        }
+        });
+    }
+
+    $('.button').click(function(event) {
+        var text = $(this).context.innerText
+        var src = $('#dyn_img').attr('src');
+        process_selection(text, src)
+    });
+
+    $(window).resize(function(event) {
+        handle_resize();
+    });
+
+    jQuery(document).ready(function($) {
+        pull_choices();
+    });
+    </script>
+</body>
+
+</html>
