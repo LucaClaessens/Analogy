@@ -38,7 +38,7 @@ sudo apt-get install libhdf5-dev
 ```
 
 ## Python setup
-The preprocessing script is written in Python 2.7; its dependencies are in the file `preprocess_requirements.txt`.
+The processing scripts are written in Python 2.7; it's dependencies are in the file `preprocess_requirements.txt`.
 You can install these dependencies in a virtual environment like this:
 
 ```bash
@@ -48,6 +48,8 @@ pip install -r preprocess_requirements.txt  # Install Python dependencies
 # Work for a while ...
 deactivate                       # Exit the virtual environment
 ```
+
+some packages will have to be installed ov
 
 ## Lua setup
 The main modeling code is written in Lua using [torch](http://torch.ch); you can find installation instructions

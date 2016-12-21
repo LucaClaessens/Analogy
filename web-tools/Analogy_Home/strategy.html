@@ -18,10 +18,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/analogy.js"></script>
+    <script src="js/pathformer.js"></script>
     <script src="js/vivus.js"></script>
 </head>
 
 <body>
+
     <div id="bg_intro" class="jumbotron">
         <div class="container landing_cont">
             <nav role="navigation" class="navbar navbar-none">
@@ -29,14 +31,13 @@
                     <button data-target="#navbar-collapse-02" data-toggle="collapse" class="navbar-toggle" type="button">
                         <span class="sr-only">Toggle navigation</span>
                     </button>
-                    <a href="#" class="backglow navbar-brand brand"><span class="highlight">Analogy</span><span class="redactor-invisible-space"></span></a>
+                    <a href="index.html" class="backglow navbar-brand brand"><span class="highlight">Analogy</span><span class="redactor-invisible-space"></span></a>
                 </div>
                 <div id="navbar-collapse-02" class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="propClone"><a href="index.html#top"><span class="highlight">Home</span></a></li>
-                        <li class="active propClone"><a href="index.html#strategy"><span class="highlight">Strategy</span><br></a></li>
-                        <li class="propClone"><a href="index.html#casestudies"><span class="highlight">Case Study</span><br></a></li>
-                        <li class="propClone"><a href="index.html#contact"><span class="highlight">Contact</span></a></li>
+                        <li class="propClone"><a href="index.html#bg_intro"><span class="highlight">Home</span></a></li>
+                        <li class="active propClone"><a href="strategy.html"><span class="highlight">Strategy</span><br></a></li>
+                        <li class="propClone"><a href="moneylab.html"><span class="highlight">Case Study</span><br></a></li>
                         <li class="propClone"><a href="about.html"><span class="highlight">About us</span></a></li>
                     </ul>
                 </div>
@@ -44,23 +45,31 @@
             </nav>
         </div>
     </div>
-    <section id="strategy">
-        <div class=" container">
-            <div class="col-md-10 col-md-offset-1">
-                <object id="steps-svg" type="image/svg+xml" data="img/steps.svg"></object>
-            </div>
-            <div class="col-md-offset-2 col-md-8 col-sm-12">
-                <h1 id="main_slug"><span class="fadein">Our strategy in a nutshell. Explained by our CCO.</span></h1>
+
+    <section id="strategy" class="st_ov st_parallax">
+        <div class="container">
+            <div class="col-md-12 col-sm-12">
+                <object style="max-width:100%;" id="steps-svg" type="image/svg+xml" data="img/steps.svg"></object>
             </div>
         </div>
-        <div class="topic bg_g container">
-            <div class="topicrow col-sm-12 col-md-offset-2 col-md-8">
+    </section>
+
+    <section id="parallax_content">
+    <div class="container">
+        <div class="col-md-10 col-md-offset-1 col-sm-12">
+            <div class="bg_g topic_parallax clearfix">
+                <div class="col-md-10 col-md-offset-1 col-sm-12 text-center">
+                    <h1 id="main_slug" class="ms_t"><span class="fadein">Our strategy in a nutshell. Explained by our CCO.</span></h1>
+                </div>
+                <div class="topicrow col-sm-12 col-md-10 col-md-offset-1">
                     <h4>The driving belief behind the creation of Analogy is that in the current publishing landscape a few big digital intermediaries extract most of the value out of the publication process. Platforms like Spotify and Google end up in the position of leaders, wiping out or absorbing all the resistance. As a small publisher it might seem to be there’s no motivation left to fight against these Goliaths of the industy.
                     </h4>
                     <h4>
                         After spending years researching the production models of everyday publishers Analogy found over 15 noteworthy issues that prevent publishers from competing with large online platforms. While industry leaders are extremely up to date and use technologies like AI, Big Data, The Cloud, Wearables and VR, traditional publishers don't. Due to this lack of interest in cutting edge technology, they lose up to 94% of their revenue stream to all those costy players around them, involved in the distribution and materialization of their content.
                     </h4>
-                    <h4>
+                    <img class="max100" src="img/trgraph.jpg" alt="">
+                    <span class="text-">&uarr; figure showing the decline of the revenue due to lower innovation spendings.<br></span>
+                    <h4><br>
                         Analogy believes we can spark the interest of publishers with our beatiful, powerful and remarkably easy to use system that empowers publishers to do what they really want to do.
                         By combining the ways tech giants create their product, Analogy is able to offset many of the costs, both in money and time, that old-school publishing practices run into.
                     </h4>
@@ -68,92 +77,60 @@
                         Our aim is very simple! To help publishers optimise their practice by using future-proof models that are focused on outsourcing both financial expenses and labour. In this way, we want to give publishers back the power to compete with the giants of the industry.
                     </h4>
                     <h4>Analogy delivers highly personalised optimisations for each of our clients.As each publisher has their own special approach to their trade, each of their publishing workflows is unique too! We help by combining our cutting edge Analogy method and workflow with the current practice of our clients in order to deliver to the desired standards.
-                    Our in-house developed workflow makes use of some standard existing methods such as:
-                        <h5>Neural networks / machine learning (similar to Google Books’s way of learning about sentence structure)</h5>
-                        <h5>Crowdsourced data editing (Similar to Facebook’s feed algorythms) </h5>
+                    Our in-house developed workflow makes use of some standard existing methods such as:</h4>
+                        <div style="margin-left:20px;margin-top:-15px;">
+                        <li><h4 class="fadein">Neural networks / machine learning (similar to Google Books’s way of learning about sentence structure)</h4></li>
+                        <li><h4 class="fadein">Crowdsourced data editing (Similar to Facebook’s feed algorythms)</h4></li>
+                        </div>
                     </div>
-                    <div class=" col-sm-12 col-md-12">
-                    <h3>Content Production</h3>
-                    <p>We aggregate information based on the needs of a publishing enterprise, be that involved with books, event, exhibitions. To do so, we require access to the content produced by the enterprise. We’re equipped to scrape and compile additional information on the fly. </p>
-                    <p>This source material will be ran through a set of algorythms and eventually be compiled into a dataset suitable for machine learning purposes; we grow a set of unique networks from scratch for every use case, ensuring suitable content can be produced. </p>
-                    <p>In our test case with the <strong>Moneylab</strong> we’ve decided to use a combination of these three methods, creating an interactive setup that would make the crowd publish a list of suggestions for relevant new themes and predictions on the fields the event was focused on.</p>
-                    <br>
-                    <h3>Outsourced Design</h3>
-                    <h4 class="nbot">&ldquo;Design can be very expensive and who wants to actually deal with the quirks of some hipster snobbish design graduate?&rdquo;</h4>
-                    <p><strong>– Luca Claessens (cofounder and CTO of Analogy)</strong></p>
-                    <p>We possess a vast array of options to pick from in terms of outsourcing the Design component of the process. From outsourcing to machines, to crowdsourcing platforms, to a simple file conversion, or all of these at once and others, the key component of our design strategy is that there should be almost no design work necessary, of course, for as close to zero spending as possible. </p>
-                    <br>
-                    <h3>Ad-Sponsored Printing</h3>
-                    <p>Where neccesary, we can employ tactics garnered from a big chunk of the big media outlets out there, additional to the original data we can embed advertising, at either embedded or native level into the product, paying for part of the production process.<em> </em>be warned, not every publication is suitable for this setup!</p>
-                    <br>
-                    <h3>Smart Sales &amp; Distribution</h3>
-                    <p>The main objective of our process is, of course, to make sure the publication makes it into the hands of readers and generates revenue. For this, we employ an array of different techniques similar to those of established online platform models such as Spotify. Some options that we advise our clients to consider are the use of the Freemium model, different types of Paywalls, generating revenue party through Advertising and monetising through taking advantage of all the Data generated by the company.</p>
-                    <p>Since no company is the same, we create personalised strategies by devising the best combination of models for each specific client.</p>
-                    <h4 class="nbot">&ldquo;Reimagine what publishing technology can mean to all of us, if we have the tools to publish whatever we want, whenever we want. It&rsquo;s so easy to use, really. Analogy is portable, affordable and smartphone compatible. Meaning everyone can have a personal Shakespeare, right in his or her pocket.&rdquo;</h4>
-                    <p><strong>– Oliver Barstow (cofounder and CEO of Analogy)</strong></p>
-                    </article>
+                </div>
+            </div>
+        </div>
 </body>
 
 </html>
 </div>
 </div>
 </div>
-</section>
-<section id="footer">
-    <div class="topic t_noborder container">
-        <div class="col-sm-12 col-md-6">
-            <div class="footeritems">
-                <ul>
-                    <li>Artists&creators</li>
-                    <li>Events</li>
-                    <li>Blog</li>
-                    <li>FAQ</li>
-                    <li>Terms</li>
-                </ul>
-                <ul>
-                    <li>Marketplace</li>
-                    <li>Press</li>
-                    <li>API</li>
-                    <li>Contact</li>
-                    <li>Privacy&Cookies</li>
-                </ul>
-                <ul>
-                    <li>Company</li>
-                    <li>Jobs</li>
-                    <li>Whitepaper</li>
-                    <li>Artist Opportunities</li>
-                    <li>Imprint</li>
-                </ul>
-            </div>
-        </div>
-        <div class="rights col-sm-12 col-md-6">
-            <div class="social">
-                <div class="soc_img">
-                    <img src="img/creative-commons-license-symbol.svg" alt="">
-                </div>
-                <div class="soc_img">
-                    <img src="img/facebook-letter-logo.svg" alt="">
-                </div>
-                <div class="soc_img">
-                    <img src="img/facebook-placeholder-for-locate-places-on-maps.svg" alt="">
-                </div>
-                <div class="soc_img">
-                    <img src="img/linkedin-logo.svg" alt="">
+   <section id="footer">
+        <div class="topic t_noborder container">
+            <div class="col-xs-hidden col-sm-4 col-md-4">
+                <h4 class="nbot">Analogy</h4>
+                <div class="social">
+                    <div class="soc_img">
+                        <img src="img/creative-commons-license-symbol.svg" alt="">
+                    </div>
+                    <div class="soc_img">
+                        <img src="img/facebook-letter-logo.svg" alt="">
+                    </div>
+                    <div class="soc_img">
+                        <img src="img/facebook-placeholder-for-locate-places-on-maps.svg" alt="">
+                    </div>
+                    <div class="soc_img">
+                        <img src="img/linkedin-logo.svg" alt="">
+                    </div>
                 </div>
             </div>
-            <br>
-            <li>All rights reserved to the legitimate owner of the content.</li>
-            <li>Analogy &copy; 16</li>
+            <div class="col-xs-hidden col-sm-4 col-md-4">
+                <h5>Benno Premselahuis</h5>
+                <h5>Rhijnspoorplein 1</h5>
+                <h5>Amsterdam, the Netherlands.</h5>
+                <h5>HelloAnalogy@publishinglab.nl</h5>
+            </div>
+            <div class="col-sm-4  col-md-4">
+                <img class="max50" src="img/publab.png" alt="">
+                <br>
+                <p>All rights reserved. Publishinglab &copy; 16</p>
+            </div>
         </div>
-    </div>
-    <div class="topic powered container col-sm-12 col-md-12">
-        <div class="col-sm-12 col-md-12">
-            <span>Powered By:</span><span><img class="footer_powered" src="img/publab.png" alt=""></span>
-        </div>
-    </div>
+    </section>
 </section>
+
+<div id="summonmodal"></div>
 <script>
-new Vivus('steps-svg', {duration: 200});
+new Vivus('steps-svg', {
+    duration: 120
+});
 </script>
 </body>
 
