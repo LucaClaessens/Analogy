@@ -29,6 +29,10 @@ Configuration of all variables can be done in the `analogy_config.ini` file, her
 
 ## System setup
 
+#### OSX Installation
+Jeff Thompson has written a very detailed installation guide for OSX that you [can find here](http://www.jeffreythompson.org/blog/2016/03/25/torch-rnn-mac-install/).
+
+#### Ubuntu Installation
 You'll need to install the header files for Python 2.7 and the HDF5 library. On Ubuntu you should be able to install
 like this:
 
@@ -99,9 +103,6 @@ You can install / update them by running:
 luarocks install cltorch
 luarocks install clnn
 ```
-
-## OSX Installation
-Jeff Thompson has written a very detailed installation guide for OSX that you [can find here](http://www.jeffreythompson.org/blog/2016/03/25/torch-rnn-mac-install/).
 
 
 Any RNN backend can be used, but with the relative speed and low memory footprint we've decided to with with **torch-rnn** over other character based RNN's.

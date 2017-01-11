@@ -81,7 +81,7 @@ CREATE TABLE `prints` (
 ALTER TABLE `selected_text`
   ADD PRIMARY KEY (`selected_id`),
   ADD UNIQUE KEY `selected_data` (`selected_data`),
-  ADD FULLTEXT KEY `selected_data` (`selected_data`);
+  ADD FULLTEXT KEY `selected_data_2` (`selected_data`);
 
 --
 -- Indexen voor tabel `source_material`
