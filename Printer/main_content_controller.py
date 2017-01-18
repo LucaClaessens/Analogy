@@ -5,6 +5,7 @@ from random import randrange
 from PIL import Image
 from ConfigParser import SafeConfigParser
 import urllib, cStringIO , time
+import sys
 
 
 # Set configuration
@@ -19,39 +20,82 @@ nextInterval = 0.0   # Time of next recurring operation
 
 # Choose the right printer
 printer      = Adafruit_Thermal(serialport, baudrate, timeout=5)
+INTERVAL 	 = 5
 
-INTERVAL	= 5
-
-
-# Initialize
 def _init():
+	global VERBOSE
+	print('\n\n')
+	print('***** ANALOGY *****')
+	print('Welcome to the analogy print controller')
+	if query_yes_no("Would you like to see verbose printing information?") is True:
+		VERBOSE = True
+	else:
+		VERBOSE = False
+	print('\n\n')
+	_print()
+
+
+# PRINTING HANDLER
+def _print():
+	global VERBOSE
 	# sentences=[0],image=[1][0],type=[2]
-	content = Publication_Maker(True)
+	content = Publication_Maker(True, VERBOSE)
 
 	# if the publication maker didn't get stuck
 	if content != "stop" or None:
 		# pipe the data to here
 		data = content.output()
-		print("ran init");
 
 		#take some extra time to print premium
 		if data[2] and data[1][0]: 
 			output_print(data[0],data[1][0],data[2])
 			INTERVAL = (content.update_interval() * 5000)
 			time.sleep(10)
+			prompt_new()
 		else: 
 			#take some time to print free
 			output_print(data[0],data[1],data[2])
 			INTERVAL = (content.update_interval() * 5000)
 			time.sleep(2)
+			prompt_new()
 	else: 
-		print("didn't update anything at all.") 
-	#retry to print
-	_init()
+		print("didn't print, something went wrong.") 
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = raw_input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
 
 # print the publication
 def output_print(sentences,img_url,pubtype):
-	print(img_url)
+	if VERBOSE:	print(img_url)
 	printer.feed(3)
 	create_header(pubtype)
 	printer.feed(1)
@@ -60,13 +104,20 @@ def output_print(sentences,img_url,pubtype):
 		printer.feed(1)
 	create_sentences(sentences,pubtype)
 	printer.feed(3)
-	print('printing finished :)')
 
+#prompt for a new print
+def prompt_new():
+	print('printing finished :)')
+	if query_yes_no("Print another page?") is True:
+		_init()
+	else:
+		print('thanks for using Analogy.')
+		exit()
 
 # print the header of the publication
 def create_header(pubtype):
 	printer.doubleHeightOn()
-	printer.println('MONEYLAB #3')
+	printer.println('LABFEST')
 	printer.doubleHeightOff()
 	printer.feed(1)
 	_str = time.strftime('%b %d %Y %H:%M:%S')

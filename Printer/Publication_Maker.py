@@ -42,6 +42,7 @@ class Publication_Maker():
 	pref_premium 			= False
 	seeded 					= False
 	locked		 			= False
+	VERBOSE					= True
 
 	def __init__(self,*args):
 
@@ -57,7 +58,7 @@ class Publication_Maker():
 				searchpattern: True/False **Mandatory\npreference: 'free'\'premium' **Optional"
 			return None
 		elif len(args) == 1:
-			args = [ args[0], None ]
+			args = [ args[0], False ]
 		else:
 			args = [args[0], args[1]]
 
@@ -66,6 +67,12 @@ class Publication_Maker():
 		else:
 			self.pref_premium = False
 			self.handle_formation()
+		if args[1] == False:
+			self.VERBOSE = False
+		else:
+			self.VERBOSE = True
+
+		print "Attempting to print a publication."
 
 	# Take a look at the amount of prints already produced and their distribution
 	def update_print_count(self):
@@ -77,9 +84,9 @@ class Publication_Maker():
 		self.PUBPRINTED = self.return_sql_array(_s)[0]
 
 		self.FREEPRINTED = self.TOTALPRINTED - self.PUBPRINTED
-
-		print('total prints: {}'.format(self.TOTALPRINTED))
-		print('published prints: {}'.format(self.PUBPRINTED))
+		if self.VERBOSE:
+			print('total prints: {}'.format(self.TOTALPRINTED))
+			print('published prints: {}'.format(self.PUBPRINTED))
 
 	# Analyze 
 	def analyze_content(self):
@@ -105,7 +112,8 @@ class Publication_Maker():
 			# can we work with balance yet?
 			if self.TOTALPRINTED > MIN_PRINT_BEFORE_BALANCE:
 				CURRENT_BALANCE = self.PUBPRINTED / self.FREEPRINTED
-				print 'Free items available:{}\nPublishable items available:{}\nItems in pool:{}\nBalance:{}\n'.format(self.FREE,self.PUB, self.POOL, CURRENT_BALANCE )
+				if self.VERBOSE:
+					print 'Free items available:{}\nPublishable items available:{}\nItems in pool:{}\nBalance:{}\n'.format(self.FREE,self.PUB, self.POOL, CURRENT_BALANCE )
 				
 				# in case of lot of free content, print premium
 				if CURRENT_BALANCE < BALANCE:
@@ -190,7 +198,8 @@ class Publication_Maker():
 	def create_premium_text(self,seed):	
 		_s = """SELECT `selected_data` , MATCH `selected_data` AGAINST ('{}') AS relevance FROM selected_text ORDER BY relevance DESC LIMIT 10""".format(seed);
 		result = self.return_sql_array(_s)
-		print 'premium text items found: {} for seed: {}'.format(len(result), seed)
+		if self.VERBOSE:
+			print 'premium text items found: {} for seed: {}'.format(len(result), seed)
 		return result
 
 	# try to link images
@@ -217,9 +226,10 @@ class Publication_Maker():
 			else: _v = 0
 			_s = "INSERT INTO prints (premium) values  ({})".format(_v);
 			self.write_sql(_s)
-			print self.selected_sentences
-			print self.selected_image
-			print self.is_premium
+			if self.VERBOSE:
+				print self.selected_sentences
+				print self.selected_image
+				print self.is_premium
 			return [self.selected_sentences, self.selected_image, self.is_premium]
 
 	# handles the forming of the publication
@@ -236,7 +246,7 @@ class Publication_Maker():
 				if seed[1] != False : break
 				# if didn't work in 250 tries break from the loop
 				elif i > 250: 
-					print "can't find a seed quick enough, try to run again." 
+					print "can't find a seed for the image linking sequence quick enough, try to run again." 
 					return None
 
 			print('seed: {}'.format(seed));
