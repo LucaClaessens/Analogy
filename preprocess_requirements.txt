@@ -8,5 +8,5 @@ wsgiref==0.1.2
 
 ###### printing ######
 MySQL-python==1.2.5
-Pillow==3.4.2
+Pillow==9.0.0
 pyserial==3.2.1
